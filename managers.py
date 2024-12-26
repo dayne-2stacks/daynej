@@ -6,6 +6,7 @@ import requests
 from xml.etree import ElementTree as ET
 from bs4 import BeautifulSoup
 from registry import Registry
+from dotenv import load_dotenv
 
 
 def get_article_body(article_url):
@@ -64,6 +65,10 @@ def search():
     else:
         print(f"Failed to fetch sitemap: {response.status_code}")
         return []
+
+
+# Load the .env file
+load_dotenv()
 
 # Get open ai API key
 api_key = os.getenv("JOB_API")

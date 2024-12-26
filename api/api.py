@@ -22,7 +22,18 @@ from registry import Registry
 
 
 app = FastAPI()
-redis_client = redis.StrictRedis(host="localhost", port=6379, db=0, decode_responses=True)
+# Get Redis URL from environment
+redis_url = os.getenv("REDISCLOUD_URL")
+
+# Connect to Redis
+redis_client = redis.StrictRedis.from_url(redis_url)
+
+# Test Redis connection
+try:
+    redis_client.ping()
+    print("Redis server is running!")
+except redis.ConnectionError as e:
+    print(f"Failed to connect to Redis: {e}")
 
 init_db()
 
