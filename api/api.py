@@ -25,7 +25,7 @@ from registry import Registry
 app = FastAPI()
 
 # Connect to Redis
-url = urlparse.urlparse(os.environ.get('REDISCLOUD_URL'))
+url = urlparse(os.environ.get('REDISCLOUD_URL'))
 redis_client = redis.Redis(host=url.hostname, port=url.port, password=url.password)
 
 # Test Redis connection
