@@ -10,6 +10,7 @@ from .models import UserMessage
 from sqlalchemy.orm import Session
 from .connection import Messages, init_db, get_db
 from .tools import search_dayne_info, search_dayne_info_handler
+from fastapi.middleware.cors import CORSMiddleware
 
 
 # Add the parent directory to sys.path
@@ -23,6 +24,21 @@ from registry import Registry
 
 
 app = FastAPI()
+
+# Allow CORS for specific origins or all origins
+origins = [
+    "http://localhost:3000",  # Your React app during development
+    "https://portfolio-1-eight-rosy.vercel.app",  # Your production frontend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow specific origins or use ["*"] to allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, OPTIONS, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 # Connect to Redis
 url = urlparse(os.environ.get('REDISCLOUD_URL'))
