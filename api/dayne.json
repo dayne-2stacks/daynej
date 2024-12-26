@@ -1,0 +1,159 @@
+{
+    "PersonalInformation": {
+      "Name": "Dayne Guy",
+      "Contact": "dayneguy@usf.edu | (727) 554-4474",
+      "Location": "Tampa, FL",
+      "LinkedIn": "https://linkedin.com/in/dayne-guy",
+      "GitHub": "https://github.com/dayne-2stacks"
+    },
+    "Objectives": "Seeking internships or full-time positions as a hardware/software engineer in AI, embedded systems, or computer systems manufacturing industries with a focus on sustainability, creative design, and positive change.",
+    "Education": [
+      {
+        "Degree": "Bachelor of Science in Computer Science",
+        "Institution": {"Name": "University of South Florida", "Location": "Tampa, FL"},
+        "GPA": "4.00/4.00",
+        "ExpectedGraduation": "May 2025",
+        "SpecializedCourses": [
+          "Data Structures",
+          "Computer System Design",
+          "Computer Architecture",
+          "Algorithms",
+          "Secure Coding",
+          "Operating Systems",
+          "VLSI Design",
+          "Secure IoT",
+          "Cryptographic Hardware",
+          "Computer Vision",
+          "Artificial Intelligence"
+        ]
+      },
+      {
+        "Degree": "Associate Degree in Math and Physics",
+        "Institution": {"Name": "University of Belize", "Location": "City of Belmopan, Belize"},
+        "GPA": "3.83/4.00",
+        "Graduation": "May 2022"
+      },
+      {
+        "Degree": "Associate Degree in Biology and Chemistry",
+        "Institution": {"Name": "St. John's College Junior College", "Location": "Belize"}
+      }
+    ],
+    "SkillsAndCertifications": {
+      "ProgrammingLanguages": ["C", "C++", "Java", "JavaScript", "Python", "Verilog", "SQL", "PHP", "PostgreSQL", "Cadence Virtuoso"],
+      "SoftwareDevelopment": ["React", "Bootstrap", "Node.js", "Express.js", "Django", "REST API", "Tailwind"],
+      "MachineLearning": ["PyTorch", "OpenCV2", "NumPy", "Pandas", "Scikit-learn", "MatPlotLib"],
+      "DevOps": ["Docker", "Apache", "LAMP Stack", "GitHub Actions"],
+      "HardwareDesignAndNetworking": [
+        "Vivado",
+        "ISE",
+        "Arduino",
+        "Cadence Virtuoso",
+        "TCP/IP",
+        "IPv4/IPv6",
+        "Subnetting",
+        "VLANs",
+        "Wireless Communications",
+        "I2C",
+        "UART",
+        "Ethernet",
+        "SPI"
+      ],
+      "Certifications": ["Python Essentials", "Express Essentials", "Object-Oriented Programming", "Python Standard Library"]
+    },
+    "Projects": [
+      {
+        "Title": "7-bit Parallel Multiplier ASIC Design",
+        "Description": "Developed a multiplier using 5nm transistor technology within a 900um x 900um area using custom transistor gate layouts.",
+        "Semester": "Fall 2024"
+      },
+      {
+        "Title": "Audio Recorder Design",
+        "Description": "Designed an audio recorder with control features on a Spartan-6 board using DDR2 RAM, I2C protocol, and picoBlaze microcontroller. Conducted simulation test benches and formal verification.",
+        "Semester": "Spring 2024"
+      },
+      {
+        "Title": "Coin Detection Script",
+        "Description": "Achieved 97.81% classification accuracy using Hough Transform, SVM, and HSV profiling for coin detection.",
+        "Semester": "Fall 2024"
+      },
+      {
+        "Title": "Object Matching Script",
+        "Description": "Utilized SIFT Detector with RANSAC for object matching under occlusion scenarios, producing bounding boxes.",
+        "Semester": "Fall 2024"
+      },
+      {
+        "Title": "Fingerprint Classification Using GCN",
+        "Description": "Applied SMOTE and created a Graph Convolution Network achieving 86.5% accuracy.",
+        "Semester": "Fall 2024"
+      },
+      {
+        "Title": "Other Projects",
+        "Description": "Unix Shell (C), Semi-Autonomous Robot (Arduino), Vending Machine Simulator (Verilog), Digital Camera Blueprint, Personal Private Network (Belize-Tampa)."
+      }
+    ],
+    "WorkAndVolunteeringExperience": {
+      "ProfessionalRoles": [
+        {
+          "Title": "Volunteer Researcher",
+          "Institution": "USF College of Engineering",
+          "Description": "Developed fingerprint pore detection and matching algorithms using graph KNN and machine learning."
+        },
+        {
+          "Title": "Web Manager",
+          "Organization": "Patel College of Global Sustainability",
+          "Description": "Spearheaded website revamp and managed a database of 9,000+ users."
+        },
+        {
+          "Title": "IT Consultant",
+          "Organizations": ["Punta Gorda Town Council", "Turneffe Atoll Sustainability Association"],
+          "Description": "Delivered Python-based tax apps and migrated websites to secure local servers."
+        },
+        {
+          "Title": "STEM Journalist",
+          "Organization": "Amandala Newspaper, Belize City",
+          "Description": "Wrote science-based articles for public understanding."
+        }
+      ],
+      "Volunteering": [
+        "Science Fair Judge, Pasco County Schools (2024)",
+        "Special Events Volunteer, Hillsborough County Aging Services (2024)",
+        "Participant, USF Rotaract Volleyball Fundraiser (2023)"
+      ]
+    },
+    "Leadership": [
+      {
+        "Role": "Alumni and Networking Director",
+        "Organization": "USF AI Society",
+        "Years": "2024-Present"
+      },
+      {
+        "Role": "VP of Brotherhood",
+        "Organization": "Beta Theta Pi",
+        "Years": "2022-2023"
+      },
+      {
+        "Role": "Co-Founder and VP",
+        "Organization": "Belizean Student Association",
+        "Years": "2022-2023"
+      },
+      {
+        "Role": "Campus Outreach Director",
+        "Organization": "Tau Sigma Honor Society",
+        "Years": "2023-Present"
+      },
+      {
+        "Role": "Founding Member",
+        "Organization": "Jesuit Student Government Alliance",
+        "Years": "2018"
+      }
+    ],
+    "AwardsAndHonors": [
+      "Alumni Society Scholarship (2023-2025)",
+      "International Transfer Student Scholarship (2022-Present)",
+      "Dean’s List (2022-Present)",
+      "Beta Theta Pi Men of Principle Scholarship (2022)",
+      "Student of the Year, St. John’s College (2018)",
+      "Latin American & Caribbean Scholarship (2022)"
+    ]
+  }
+  
