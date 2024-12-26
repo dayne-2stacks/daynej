@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Response, HTTPException, Depends
 import secrets
 import redis
 import json
+from urllib.parse import urlparse
 import logging
 import sys
 import os
@@ -22,11 +23,10 @@ from registry import Registry
 
 
 app = FastAPI()
-# Get Redis URL from environment
-redis_url = os.getenv("REDISCLOUD_URL")
 
 # Connect to Redis
-redis_client = redis.StrictRedis.from_url(redis_url)
+url = urlparse.urlparse(os.environ.get('REDISCLOUD_URL'))
+redis_client = redis.Redis(host=url.hostname, port=url.port, password=url.password)
 
 # Test Redis connection
 try:
