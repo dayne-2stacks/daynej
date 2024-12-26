@@ -7,8 +7,8 @@ import sys
 import os
 from .models import UserMessage 
 from sqlalchemy.orm import Session
-from connection import Messages, init_db, get_db
-from tools import search_dayne_info, search_dayne_info_handler
+from .connection import Messages, init_db, get_db
+from .tools import search_dayne_info, search_dayne_info_handler
 
 
 # Add the parent directory to sys.path

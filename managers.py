@@ -68,6 +68,8 @@ def search():
 # Get open ai API key
 api_key = os.getenv("JOB_API")
 
+
+
 # initialize a client
 client = OpenAI(api_key=api_key)
 
