@@ -198,7 +198,7 @@ class AssistantManager:
     def wait_for_completion(self):
         if self.thread and self.run:
             while True:
-                time.sleep(5)
+                time.sleep(0.5)
                 run_status = self.client.beta.threads.runs.retrieve(
                     thread_id=self.thread.id,
                     run_id=self.run.id
