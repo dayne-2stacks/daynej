@@ -175,29 +175,26 @@ class AssistantManager:
     def call_required_functions(self, required_actions):
         if not self.run:
             return
+        tool_outputs = []
 
-        def process_action(action):
+        for action in required_actions["tool_calls"]:
             func_name = action["function"]["name"]
             args = json.loads(action["function"]["arguments"])
             if func_name in self.registry.manager.keys():
-                return {"tool_call_id": action["id"], "output": self.registry.call(func_name, **args)}
+                output = self.registry.call(func_name, **args)
+                tool_outputs.append({"tool_call_id": action["id"], "output": output})
             elif func_name == "get_news":
                 output = search()
                 final_str = "".join([item or "" for item in output])
-                return {"tool_call_id": action["id"], "output": final_str}
+                tool_outputs.append({"tool_call_id": action["id"], "output": final_str})
             else:
                 raise ValueError(f"Unknown function: {func_name}")
-
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            tool_outputs = list(executor.map(process_action, required_actions["tool_calls"]))
-
         print("SUBMITTING TOOLS BACK TO ASSISTANT")
         self.client.beta.threads.runs.submit_tool_outputs(
             thread_id=self.thread.id,
             run_id=self.run.id,
             tool_outputs=tool_outputs
         )
-
 
     async def wait_for_completion(self):
         if self.thread and self.run:
