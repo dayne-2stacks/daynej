@@ -7,9 +7,6 @@ from xml.etree import ElementTree as ET
 from bs4 import BeautifulSoup
 from registry import Registry
 from dotenv import load_dotenv
-from concurrent.futures import ThreadPoolExecutor
-from functools import lru_cache
-import asyncio
 
 
 def get_article_body(article_url):
@@ -83,10 +80,11 @@ client = OpenAI(api_key=api_key)
 
 
 class AssistantManager:
-    thread_id = None
-    assistant_id = None
+    thread_id=None
+    assistant_id=None
 
-    def __init__(self, model: str = "gpt-4o", registry=None) -> None:
+
+    def __init__(self, model:str = "gpt-4o", registry=None) -> None:
         self.client = client
         self.model = model
         self.assistant = None
@@ -94,42 +92,35 @@ class AssistantManager:
         self.run = None
         self.summary = None
         self.registry = registry or Registry()
-
-        # Utilize cached assistant retrieval
-        self.assistant = self.get_cached_assistant()
+        
+        if AssistantManager.assistant_id:
+            self.assistant = self.client.beta.assistants.retrieve(
+                assistant_id=AssistantManager.assistant_id
+                )
 
         if AssistantManager.thread_id:
             self.thread = self.client.beta.threads.retrieve(
                 thread_id=AssistantManager.thread_id
-            )
-
-    @staticmethod
-    @lru_cache(maxsize=1)
-    def get_cached_assistant():
-        if AssistantManager.assistant_id:
-            return client.beta.assistants.retrieve(
-                assistant_id=AssistantManager.assistant_id
-            )
-        return None
+            )  
 
     def connect_confirm(self):
         return {
-            "status": "Manager created!",
-            "assistant_id": self.assistant.id if self.assistant else None,
-            "thread_id": self.thread.id if self.thread else None
-        }
+            "status" : "Manager created!",
+             "assistant_id": self.assistant.id,
+             "thread_id": self.thread.id
 
+             }
+    
     def create_assistant(self, name, instructions, tools):
         if not self.assistant:
             assistant_obj = self.client.beta.assistants.create(
                 name=name,
                 instructions=instructions,
                 tools=tools,
-                model=self.model
+                model = self.model
             )
             AssistantManager.assistant_id = assistant_obj.id
             self.assistant = assistant_obj
-            self.get_cached_assistant.cache_clear()
             print(assistant_obj)
 
     def create_thread(self):
@@ -142,10 +133,10 @@ class AssistantManager:
         if self.thread:
             self.client.beta.threads.messages.create(
                 thread_id=self.thread.id,
-                role=role,
+                role = role,
                 content=content
             )
-
+    
     def add_registry(self, registry):
         self.registry = registry
 
@@ -156,21 +147,25 @@ class AssistantManager:
                 assistant_id=self.assistant.id,
                 instructions=instructions
             )
-
     def get_last_message(self):
         if self.thread:
             messages = self.client.beta.threads.messages.list(
                 thread_id=self.thread_id,
             )
-            return messages.data[0] if messages.data else None
+            last_message = messages.data[0]
+            return last_message
 
     def process_messages(self):
         if self.thread:
+            
+            summary = []
             last_message = self.get_last_message()
-            if last_message:
-                print(f"Last Message ->>> {last_message}")
-                response = last_message.content[0].text.value
-                print(f"SUMMARY---> {last_message.role.capitalize()}: ==> {response}")
+            print(f"Last Message ->>> {last_message}")
+            response = last_message.content[0].text.value
+            role = last_message.role
+            summary.append(response)
+            self.summary=f"\n".join(summary)
+            print(f"SUMMARY---> {role.capitalize()}: ==> {response}")
 
     def call_required_functions(self, required_actions):
         if not self.run:
@@ -184,8 +179,11 @@ class AssistantManager:
                 output = self.registry.call(func_name, **args)
                 tool_outputs.append({"tool_call_id": action["id"], "output": output})
             elif func_name == "get_news":
-                output = search()
-                final_str = "".join([item or "" for item in output])
+                output = get_news(topic=args["topic"])
+                print(f"OUTPUTS ->>>> {func_name}: {output}")
+                final_str = ""
+                for item in output:
+                    final_str += "".join(item)
                 tool_outputs.append({"tool_call_id": action["id"], "output": final_str})
             else:
                 raise ValueError(f"Unknown function: {func_name}")
@@ -196,34 +194,31 @@ class AssistantManager:
             tool_outputs=tool_outputs
         )
 
-    async def wait_for_completion(self):
+
+    def wait_for_completion(self):
         if self.thread and self.run:
-            delay = 0.5
             while True:
-                await asyncio.sleep(delay)
+                time.sleep(0.5)
                 run_status = self.client.beta.threads.runs.retrieve(
                     thread_id=self.thread.id,
                     run_id=self.run.id
                 )
+                print(f"RUN STATUS ---> {run_status.model_dump_json(indent=4)}")
 
                 if run_status.status == "completed":
                     self.process_messages()
                     break
                 elif run_status.status == 'requires_action':
+                    print("FUNCTIONS CALLING NOW")
                     self.call_required_functions(
                         required_actions=run_status.required_action.submit_tool_outputs.model_dump()
                     )
-                else:
-                    delay = min(delay * 1.5, 10)  # Exponential backoff up to 10 seconds
-
+    
     def run_steps(self):
         run_steps = self.client.beta.threads.runs.steps.list(
-            thread_id=self.thread.id,
-            run_id=self.run.id
+            thread_id = self.thread.id,
+            run_id= self.run.id
         )
+
         print(f"Run Steps::: {run_steps}")
         return run_steps.data
-
-
-
-    
