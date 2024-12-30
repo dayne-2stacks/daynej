@@ -235,8 +235,8 @@ async def chat(
 # @app.get("/validate-session")
 # def validate_session(request: Request):
     # Retrieve session ID from cookies
-    session_id = request.cookies.get("session_id")
-    if not session_id or not redis_client.get(session_id):
-        raise HTTPException(status_code=401, detail="Session invalid or expired")
+    # session_id = request.cookies.get("session_id")
+    # if not session_id or not redis_client.get(session_id):
+    #     raise HTTPException(status_code=401, detail="Session invalid or expired")
     
-    return {"message": "Session is valid", "session_id": session_id}
+    # return {"message": "Session is valid", "session_id": session_id}
