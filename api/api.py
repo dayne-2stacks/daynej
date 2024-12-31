@@ -9,8 +9,9 @@ import os
 from .models import UserMessage 
 from sqlalchemy.orm import Session
 from .connection import Messages, init_db, get_db
-from .tools import search_dayne_info, search_dayne_info_handler
+# from .tools import search_dayne_info, search_dayne_info_handler
 from fastapi.middleware.cors import CORSMiddleware
+
 
 
 # Add the parent directory to sys.path
@@ -105,26 +106,26 @@ def get_or_create_manager(
         # Deserialize existing manager
         AssistantManager.assistant_id = manager_data.get("assistant_id")
         AssistantManager.thread_id = manager_data.get("thread_id")
-        toolkit = [search_dayne_info]
+        # toolkit = [search_dayne_info]
 
-        helpers = [search_dayne_info_handler]
+        # helpers = [search_dayne_info_handler]
 
         registry = Registry()
         
         # Loop to register each tool
-        for func, helper in zip(toolkit, helpers):
-            registry.register_tool(Tool(func, helper))
+        # for func, helper in zip(toolkit, helpers):
+        #     registry.register_tool(Tool(func, helper))
         manager = AssistantManager(registry=registry)
     else:
-        toolkit = [search_dayne_info]
+        # toolkit = [search_dayne_info]
 
-        helpers = [search_dayne_info_handler]
+        # helpers = [search_dayne_info_handler]
 
         registry = Registry()
         
         # Loop to register each tool
-        for func, helper in zip(toolkit, helpers):
-            registry.register_tool(Tool(func, helper))
+        # for func, helper in zip(toolkit, helpers):
+        #     registry.register_tool(Tool(func, helper))
 
         # Create a new manager
         manager = AssistantManager(registry=registry)
@@ -133,13 +134,28 @@ def get_or_create_manager(
        
 
         # manager.add_registry(registry)
-
-        tools = [function_to_schema(tool) for tool in toolkit]
+       
+        # tools = [function_to_schema(tool) for tool in toolkit]
+        
+        instructions="""
+         You are Dayne's personal assistant, you will sing high praises of his work ethic.
+         Do not engage in any other conversations that aren't related to Dayne. 
+         If a question is asked about Dayne, answer if it could be deduced from "Dayne Details",
+         Do not cite "Dayne Details" in your responses, just answer the question. Provide the response without any citations or references.
+         but if you do not know or cant find the requested information about dayne, ask them to contact Dayne at dayneguy@gmail.com.
+         Feel free to refer to Dayne as your creator. Be conversational and friendly. 
+         
+         """
+        
+        description="""
+            You are Dayne's personal assistant, who responds to users with specific notice to Dayne.
+        """
 
         manager.create_assistant(
             name="Dayne's assistant",
-            instructions="You are Dayne's personal assistant, you will sing high praises of his ethic",
-            tools=tools
+            instructions=instructions,
+            description=description
+            # tools=tools
         )
         manager.create_thread()
     
@@ -210,6 +226,7 @@ async def chat(
     
     # Get the assistant's response
     assistant_response = manager.get_last_message() 
+    
     logging.debug(manager.run_steps())
     
     return {"message": "Message submitted successfully.", "response": assistant_response}

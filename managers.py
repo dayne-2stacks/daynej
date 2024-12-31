@@ -111,16 +111,22 @@ class AssistantManager:
 
              }
     
-    def create_assistant(self, name, instructions, tools):
+    def create_assistant(self, name, instructions, description="", tools=[]):
+        if not tools:
+            tools = [{"type": "file_search"}, {"type": "code_interpreter"}]
+        else:
+            tools += [{"type": "file_search"}, {"type": "code_interpreter"}]
         if not self.assistant:
             assistant_obj = self.client.beta.assistants.create(
                 name=name,
                 instructions=instructions,
+                description=description,
                 tools=tools,
                 model = self.model
             )
             AssistantManager.assistant_id = assistant_obj.id
             self.assistant = assistant_obj
+            self.enable_file_search()
             print(assistant_obj)
 
     def create_thread(self):
@@ -137,6 +143,29 @@ class AssistantManager:
                 content=content
             )
     
+    def enable_file_search(self):
+        # Create a vector store caled "Financial Statements"
+        vector_store = self.client.beta.vector_stores.create(name="Dayne Details")
+
+        # Ready the files for upload to OpenAI
+        file_paths = ["api/dayne.json"]
+        file_streams = [open(os.path.join(os.path.dirname(__file__), path), "rb") for path in file_paths]
+
+        # Use the upload and poll SDK helper to upload the files, add them to the vector store,
+        # and poll the status of the file batch for completion.
+        file_batch = self.client.beta.vector_stores.file_batches.upload_and_poll(
+            vector_store_id=vector_store.id, files=file_streams
+        )
+
+        self.client.beta.assistants.update(
+            assistant_id=self.assistant.id,
+            tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}},
+        )
+
+        print(f"Updated Assitant with Vector store: {vector_store.id}")
+
+
+
     def add_registry(self, registry):
         self.registry = registry
 
@@ -147,6 +176,8 @@ class AssistantManager:
                 assistant_id=self.assistant.id,
                 instructions=instructions
             )
+
+
     def get_last_message(self):
         if self.thread:
             messages = self.client.beta.threads.messages.list(
@@ -177,7 +208,7 @@ class AssistantManager:
             args = json.loads(action["function"]["arguments"])
             if func_name in self.registry.manager.keys():
                 output = self.registry.call(func_name, **args)
-                tool_outputs.append({"tool_call_id": action["id"], "output": output})
+                tool_outputs.append({"toolcall_id": action["id"], "output": output})
             elif func_name == "get_news":
                 output = get_news(topic=args["topic"])
                 print(f"OUTPUTS ->>>> {func_name}: {output}")
@@ -222,3 +253,26 @@ class AssistantManager:
 
         print(f"Run Steps::: {run_steps}")
         return run_steps.data
+
+
+
+if "__main__" == __name__:
+    assistant = AssistantManager()
+    assistant.create_assistant(
+        name="DJ",
+        instructions="You are a chatbot",
+        tools=None
+    )
+
+    # assistant.client.beta.assistants.retrieve(assistant_id='asst_812CIMTS6q8O5d0yTXp67iav')
+
+    assistant.create_thread()
+    assistant.add_message_to_thread(role="user", content="Would Dayne be a good fit for a software engineer role?")
+
+    assistant.run_assistant("Answer the questions")
+    
+    assistant.wait_for_completion()
+    print(f"{assistant.get_last_message()}")
+    
+    
+  
