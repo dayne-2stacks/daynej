@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from managers import AssistantManager
+from agents_manager import AgentManager
 from registry import Registry
 
 
@@ -87,7 +87,7 @@ def ensure_session(request: Request, response: Response):
 
 def get_or_create_manager(
     session_id: str = Depends(ensure_session),
-) -> AssistantManager:
+) -> AgentManager:
     # Retrieve session data from Redis
     session_data = redis_client.get(session_id)
 
@@ -97,22 +97,11 @@ def get_or_create_manager(
     except json.JSONDecodeError:
         session_data = {}
 
-    # Initialize or retrieve AssistantManager
+    # Initialize or retrieve AgentManager
     manager_data = session_data.get("assistant")
     if manager_data:
-        # Deserialize existing manager
-        AssistantManager.assistant_id = manager_data.get("assistant_id")
-        AssistantManager.thread_id = manager_data.get("thread_id")
-        # toolkit = [search_dayne_info]
-
-        # helpers = [search_dayne_info_handler]
-
         registry = Registry()
-
-        # Loop to register each tool
-        # for func, helper in zip(toolkit, helpers):
-        #     registry.register_tool(Tool(func, helper))
-        manager = AssistantManager(registry=registry)
+        manager = AgentManager(registry=registry)
     else:
         # toolkit = [search_dayne_info]
 
@@ -125,7 +114,7 @@ def get_or_create_manager(
         #     registry.register_tool(Tool(func, helper))
 
         # Create a new manager
-        manager = AssistantManager(registry=registry)
+        manager = AgentManager(registry=registry)
 
         # manager.add_registry(registry)
 
@@ -145,19 +134,14 @@ def get_or_create_manager(
             You are Dayne's personal assistant, who responds to users with specific notice to Dayne.
         """
 
-        manager.create_assistant(
+        manager.create_agent(
             name="Dayne's assistant",
             instructions=instructions,
             description=description,
-            # tools=tools
         )
-        manager.create_thread()
 
     # Save updated manager state back to session
-    session_data["assistant"] = {
-        "assistant_id": AssistantManager.assistant_id,
-        "thread_id": AssistantManager.thread_id,
-    }
+    session_data["assistant"] = {"agent": True}
     redis_client.setex(
         session_id, 1800, json.dumps(session_data)
     )  # Update TTL and session data
@@ -169,7 +153,7 @@ def get_or_create_manager(
 async def index(
     response: Response,
     session_id: str = Depends(ensure_session),
-    manager: AssistantManager = Depends(get_or_create_manager),
+    manager: AgentManager = Depends(get_or_create_manager),
 ):
     # Use the `manager` injected by the dependency
     status = manager.connect_confirm()
@@ -185,7 +169,7 @@ async def index(
 async def register(
     response: Response,
     message: UserMessage,
-    manager: AssistantManager = Depends(get_or_create_manager),
+    manager: AgentManager = Depends(get_or_create_manager),
     db: Session = Depends(get_db),
 ):
 
@@ -194,12 +178,11 @@ async def register(
     user_message = Messages(**attributes)
 
     prompt = f"Answer questions conserning {user_message.reason}. Refer to the person as {user_message.fname}. {user_message.fname} had written {user_message.message}. "
-    manager.add_message_to_thread("user", prompt)
-    manager.run_assistant(instructions="Answer messages appropriately")
+    manager.add_message("user", prompt)
+    await manager.run_agent(instructions="Answer messages appropriately")
     db.add(user_message)
     db.commit()
     db.refresh(user_message)
-    manager.wait_for_completion()
     message = manager.get_last_message()
     return {
         "message": "User registered successfully.",
@@ -213,20 +196,16 @@ async def chat(
     response: Response,
     message: UserMessage,
     session_id: str = Depends(ensure_session),
-    manager: AssistantManager = Depends(get_or_create_manager),
+    manager: AgentManager = Depends(get_or_create_manager),
     db: Session = Depends(get_db),
 ):
     # Process the incoming message
-    manager.add_message_to_thread("user", message.message)
-    manager.run_assistant(
+    manager.add_message("user", message.message)
+    await manager.run_agent(
         instructions="Answer messages appropriately. Be conversational with no filler words. If you cannot dind information, tell them to email Dayne at dayneguy@gmail.com"
     )
-    manager.wait_for_completion()
 
-    # Get the assistant's response
     assistant_response = manager.get_last_message()
-
-    logging.debug(manager.run_steps())
 
     return {
         "message": "Message submitted successfully.",
