@@ -20,6 +20,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from agents_manager import AgentManager
 from registry import Registry
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 app = FastAPI()
 
