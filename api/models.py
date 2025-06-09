@@ -6,4 +6,4 @@ class UserMessage(BaseModel):
     lname: str | None = None
     email: str | None = None
     reason: str | None = None
-    message: str 
+    message: str

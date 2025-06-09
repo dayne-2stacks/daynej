@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Callable, Any, ClassVar, Dict
+from typing import Callable, Any, Dict
+
 
 class Tool(BaseModel):
     func: Callable[[], Any]
@@ -12,8 +13,9 @@ class Tool(BaseModel):
 
 
 class Registry(BaseModel):
-    manager: Dict[str, Tool]  = Field(default_factory=dict)  # Initialize as an empty dictionary
-    
+    manager: Dict[str, Tool] = Field(
+        default_factory=dict
+    )  # Initialize as an empty dictionary
 
     def register_tool(self, tool: Tool):
         # Add the tool to the manager using its __name__
@@ -22,17 +24,19 @@ class Registry(BaseModel):
     def call(self, tool_name: str, *args, **kwargs):
         # Call the handler of the specified tool by its name
         if tool_name in self.manager:
-            return self.manager[tool_name].handler(self.manager[tool_name].func, **kwargs)
+            return self.manager[tool_name].handler(
+                self.manager[tool_name].func, **kwargs
+            )
         else:
             raise ValueError(f"Tool '{tool_name}' not found in registry.")
-        
+
     def __getitem__(self, item: str) -> Tool:
         # Implement subscriptable access for the registry
         if item in self.manager:
             return self.manager[item]
         else:
             raise KeyError(f"Tool '{item}' not found in registry.")
-        
+
     def model_dump(self, **kwargs):
         # Serialize the manager, calling `model_dump` on each Tool
         return {
