@@ -144,7 +144,13 @@ class AssistantManager:
         vector_store = self.client.beta.vector_stores.create(name="Dayne Details")
 
         # Ready the files for upload to OpenAI
-        file_paths = ["api/dayne.json"]
+        file_paths = [
+            "api/kb/dayne.json",
+            "api/kb/behavioral_questions.json",
+            "api/kb/demographic_info.json",
+            "api/kb/experiences.json",
+            "api/kb/hobbies.json",
+        ]
         file_streams = [
             open(os.path.join(os.path.dirname(__file__), path), "rb")
             for path in file_paths
