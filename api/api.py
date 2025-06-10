@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Response, Depends
+from fastapi import FastAPI, Request, Response, Depends, WebSocket, WebSocketDisconnect
 import secrets
 import redis
 import json
@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from agents_manager import AgentManager
+from agents import ItemHelpers
 from registry import Registry
 
 from dotenv import load_dotenv
@@ -28,14 +29,11 @@ load_dotenv()
 app = FastAPI()
 
 # Allow CORS for specific origins or all origins
-origins = [
-    "http://localhost:3000",  # Your React app during development
-    "https://portfolio-1-eight-rosy.vercel.app",  # Your production frontend
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow specific origins or use ["*"] to allow all origins
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, OPTIONS, etc.)
     allow_headers=["*"],  # Allow all headers
@@ -215,6 +213,38 @@ async def chat(
         "message": "Message submitted successfully.",
         "response": assistant_response,
     }
+
+
+@app.websocket("/ws/chat")
+async def websocket_chat(websocket: WebSocket):
+    """Handle chat communication over a WebSocket."""
+    response = Response()
+    session_id = ensure_session(websocket, response)
+    manager = get_or_create_manager(session_id)
+
+    await websocket.accept(headers=response.raw_headers)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            manager.add_message("user", data)
+
+            from agents.run import Runner
+            from agents.stream_events import RunItemStreamEvent
+
+            streamed = await Runner.run_streamed(manager.agent, manager.input_list)
+
+            text_buffer = ""
+            async for event in streamed.stream_events():
+                if isinstance(event, RunItemStreamEvent):
+                    delta = ItemHelpers.text_message_outputs([event.item])
+                    if delta:
+                        text_buffer += delta
+                        await websocket.send_text(delta)
+
+            manager.input_list = streamed.to_input_list()
+    except WebSocketDisconnect:
+        pass
 
 
 # @app.get("/start-session")

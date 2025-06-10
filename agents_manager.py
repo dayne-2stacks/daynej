@@ -1,12 +1,13 @@
 from openai import OpenAI
 from agents import (
     Agent,
-    run,
     FileSearchTool,
     CodeInterpreterTool,
     function_tool,
     ItemHelpers,
 )
+from openai.types.responses.tool_param import CodeInterpreter
+from agents.run import Runner
 import os
 from registry import Registry
 
@@ -35,12 +36,12 @@ class AgentManager:
         return {"status": "Agent ready"}
 
     def enable_file_search(self) -> None:
-        vector_store = self.client.beta.vector_stores.create(name="Dayne Details")
+        vector_store = self.client.vector_stores.create(name="Dayne Details")
         file_paths = ["api/dayne.json"]
         file_streams = [
             open(os.path.join(os.path.dirname(__file__), p), "rb") for p in file_paths
         ]
-        self.client.beta.vector_stores.file_batches.upload_and_poll(
+        self.client.vector_stores.file_batches.upload_and_poll(
             vector_store_id=vector_store.id, files=file_streams
         )
         self.vector_store_id = vector_store.id
@@ -50,7 +51,11 @@ class AgentManager:
             self.enable_file_search()
         tools = self._registry_tools()
         tools.append(FileSearchTool(vector_store_ids=[self.vector_store_id]))
-        tools.append(CodeInterpreterTool({}))
+        code_tool_config: CodeInterpreter = {
+            "type": "code_interpreter",
+            "container": {"type": "auto"},
+        }
+        tools.append(CodeInterpreterTool(code_tool_config))
         self.agent = Agent(
             name=name, instructions=instructions, model=self.model, tools=tools
         )
@@ -66,7 +71,7 @@ class AgentManager:
             if not instructions
             else self.agent.clone(instructions=instructions)
         )
-        self.result = await run(agent, self.input_list)
+        self.result = await Runner.run(agent, self.input_list)
         self.input_list = self.result.to_input_list()
 
     def get_last_message(self) -> str | None:
