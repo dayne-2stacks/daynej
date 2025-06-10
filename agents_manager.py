@@ -37,7 +37,13 @@ class AgentManager:
 
     def enable_file_search(self) -> None:
         vector_store = self.client.vector_stores.create(name="Dayne Details")
-        file_paths = ["api/dayne.json"]
+        file_paths = [
+            "api/kb/dayne.json",
+            "api/kb/behavioral_questions.json",
+            "api/kb/demographic_info.json",
+            "api/kb/experiences.json",
+            "api/kb/hobbies.json",
+        ]
         file_streams = [
             open(os.path.join(os.path.dirname(__file__), p), "rb") for p in file_paths
         ]
