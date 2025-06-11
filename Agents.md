@@ -137,3 +137,7 @@ Use pytest with fixtures for Context, Message, and AgentRunner.
 Use async def tests for streaming handlers and SSE output.
 Always mock external API/tool calls during unit tests.
 Each written code should be strictly tested. We adopt a test first design principle.
+
+## Considerations
+
+We need to consider a fast and effective communication protocol. It will be interacting with a frontend application to receive responses for a website, with future implementation as a email manager.
