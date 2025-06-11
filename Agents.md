@@ -108,6 +108,9 @@ Multi-Agent Skeleton (agents_ext/)
 Contains ``BaseAgent``, ``Memory``, and ``Planner`` classes along with an
 ``AgentRunner`` for orchestrating agent execution. These modules will evolve
 into a full multi-agent framework.
+The core package now also provides ``RetrievalAgent`` which handles embedding
+based search and an optional second-stage reranker used by agents like
+``BehavioralQuestionAgent``.
 FastAPI Application (api/api.py)
 Defines endpoints for registering a user, sending chat messages, streaming responses, and a WebSocket interface.
 Utilizes Redis for session management and stores user messages in SQLite via SQLAlchemy.

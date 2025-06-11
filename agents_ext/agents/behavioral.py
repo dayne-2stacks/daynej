@@ -1,59 +1,37 @@
 from __future__ import annotations
 
 import os
-from math import sqrt
-
 from openai import OpenAI
 
-from ..core.base_agent import BaseAgent
+from ..core.retrieval_agent import RetrievalAgent
 from .utils import load_json
 
 
-class BehavioralQuestionAgent(BaseAgent):
+class BehavioralQuestionAgent(RetrievalAgent):
     """Answer interview style questions using Dayne's past experiences."""
 
     def __init__(
-        self, model: str = "gpt-4o", embed_model: str = "text-embedding-3-small"
+        self,
+        model: str = "gpt-4o",
+        embed_model: str = "text-embedding-3-small",
+        rerank_model: str | None = "text-embedding-3-large",
     ) -> None:
-        super().__init__("behavioral")
-        self.client = OpenAI(api_key=os.getenv("JOB_API"))
-        self.model = model
-        self.embed_model = embed_model
         self.experiences = load_json("experiences.json")
-        self._embeddings: list[list[float]] | None = None
+        super().__init__(
+            "behavioral",
+            data=self.experiences,
+            model=model,
+            embed_model=embed_model,
+            rerank_model=rerank_model,
+        )
+        self.client = OpenAI(api_key=os.getenv("JOB_API"))
 
-    def _embed(self, text: str) -> list[float]:
-        response = self.client.embeddings.create(model=self.embed_model, input=text)
-        return response.data[0].embedding
-
-    def _ensure_embeddings(self) -> None:
-        if self._embeddings is not None:
-            return
-        self._embeddings = []
-        for entry in self.experiences:
-            text = entry.get("answer") or entry.get("question", "")
-            self._embeddings.append(self._embed(text))
-
-    @staticmethod
-    def _cosine(a: list[float], b: list[float]) -> float:
-        dot = sum(x * y for x, y in zip(a, b))
-        norm_a = sqrt(sum(x * x for x in a))
-        norm_b = sqrt(sum(x * x for x in b))
-        if norm_a == 0 or norm_b == 0:
-            return 0.0
-        return dot / (norm_a * norm_b)
+    def _get_entry_text(self, entry: dict) -> str:  # type: ignore[override]
+        return entry.get("answer") or entry.get("question", "")
 
     def _top_experiences(self, query: str, k: int = 3) -> list[str]:
-        self._ensure_embeddings()
-        query_emb = self._embed(query)
-        scores = [self._cosine(query_emb, emb) for emb in self._embeddings or []]
-        ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
-        result = []
-        for idx in ranked[:k]:
-            text = self.experiences[idx].get("answer")
-            if text:
-                result.append(text)
-        return result
+        entries = self.retrieve(query, k)
+        return [self._get_entry_text(e) for e in entries]
 
     def _build_messages(self, question: str) -> list[dict]:
         history = self.memory.messages[-5:]
@@ -84,6 +62,7 @@ if __name__ == "__main__":
     import argparse
     import asyncio
     from dotenv import load_dotenv
+
     load_dotenv()
 
     parser = argparse.ArgumentParser(

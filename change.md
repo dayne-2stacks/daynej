@@ -11,3 +11,5 @@
   `agents_ext/agents` and updated `TriageAgent` accordingly.
 - BehavioralQuestionAgent now uses chat history and OpenAI retrieval to answer
   interview questions based on experiences.json. Added unit tests.
+- Introduced ``RetrievalAgent`` base class providing embedding search with a
+  second-stage reranker. BehavioralQuestionAgent now inherits from it.
