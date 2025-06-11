@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 api/__pycache__
+.DS_Store
+.gitignore
+usermessages.db

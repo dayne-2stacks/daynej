@@ -23,6 +23,8 @@ Specializes in questions about internships, projects, or accomplishments (see ap
 
 Behavioral Question Agent
 Handles typical interview questions using api/kb/behavioral_questions.json.
+Now consults chat history and leverages OpenAI to retrieve the most relevant
+entries from experiences.json, grounding responses in Dayne's past work.
 
 Hobbies Agent
 Responds to inquiries about dayne's hobbies and passion drawn from api/kb/hobbies.json.

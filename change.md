@@ -9,3 +9,5 @@
 - Added tests for new routing paths.
 - Refactored agents so each specialized agent resides in its own module under
   `agents_ext/agents` and updated `TriageAgent` accordingly.
+- BehavioralQuestionAgent now uses chat history and OpenAI retrieval to answer
+  interview questions based on experiences.json. Added unit tests.

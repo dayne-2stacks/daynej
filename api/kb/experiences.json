@@ -3,5 +3,13 @@
   {"question": "Outline your most recent internship or job.", "answer": ""},
   {"question": "What volunteering experience are you most proud of?", "answer": ""},
   {"question": "Have you ever worked in another country or culture?", "answer": ""},
-  {"question": "Tell me about a personal project you enjoyed working on.", "answer": ""}
+  {"question": "Tell me about a personal project you enjoyed working on.", "answer": ""},
+  {"question": "What skills have you developed through your experiences?", "answer": ""},
+  {"question": "How have your experiences shaped your career goals?", "answer": ""},
+  {
+    "question": "Describe a challenge you faced in a team setting.", 
+    "answer": "When I was student body president, we faced serious issues revolving around classism between student body members. Coming from a humble background, I was able to relate to the students who felt marginalized. I never managed to fully fix the issue, but I treated all members with respect."
+  },
+  {"question": "What leadership roles have you taken on in your experiences?", "answer": ""},
+  {"question": "How do you handle feedback from peers or supervisors?", "answer": ""}
 ]

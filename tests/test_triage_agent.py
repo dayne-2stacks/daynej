@@ -29,10 +29,38 @@ async def test_triage_fallback(anyio_backend):
 
 
 @pytest.mark.anyio
-async def test_triage_behavioral(anyio_backend):
+async def test_triage_behavioral(anyio_backend, monkeypatch):
     agent = TriageAgent()
+
+    class DummyMsg:
+        def __init__(self, content: str) -> None:
+            self.message = type("m", (), {"content": content})
+
+    class DummyEmb:
+        def __init__(self) -> None:
+            self.embedding = [1.0, 0.0, 0.0]
+
+    def fake_embed(model, input):
+        class Resp:
+            data = [DummyEmb()]
+
+        return Resp()
+
+    def fake_chat(model, messages):
+        class Resp:
+            choices = [DummyMsg("behavioral resp")]
+
+        return Resp()
+
+    monkeypatch.setattr(agent.behavioral.client.embeddings, "create", fake_embed)
+    monkeypatch.setattr(
+        agent.behavioral.client.chat.completions,
+        "create",
+        fake_chat,
+    )
+
     result = await agent.run("Give me a behavioral interview question")
-    assert "Dayne" in result
+    assert "behavioral resp" in result
 
 
 @pytest.mark.anyio
