@@ -34,6 +34,8 @@ If none of the specialized agents apply, this agent can request clarification or
 ## Coding Conventions
 Our code abides strictly to OpenAI agents SDK. It will folloow the convention of handoffs and route agents so that each agent handles a singular and relatively easy task. Our code will also use an LLM as a judge in the sense that it will check its outputs and verify  if it needs to recall an agent or if it is an acceptable answer. Multiple agents will alsoo be running in parralel whereever possible. We will also be using MCP to govern tool use of our agents.
 
+Remember to update the Agents.md file whenever you make a large update to the code. Also bin/prepare.sh has been written to allow you to test and lint after making changes.
+
 
 ## Current Project structure (You will change this to adhere closely to OpenAI SDK's suggested implementation)
 
