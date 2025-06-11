@@ -4,6 +4,8 @@ import os
 from math import sqrt
 from typing import Any, Dict, List
 
+os.environ["HF_HOME"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "models"))
+
 try:
     from sentence_transformers.cross_encoder import CrossEncoder  # type: ignore
 except Exception:  # pragma: no cover - optional dependency
@@ -13,6 +15,7 @@ except Exception:  # pragma: no cover - optional dependency
 from openai import OpenAI
 
 from .base_agent import BaseAgent
+
 
 
 class RetrievalAgent(BaseAgent):
@@ -27,6 +30,7 @@ class RetrievalAgent(BaseAgent):
         rerank_models: List[str] | None = None,
     ) -> None:
         super().__init__(name)
+        
         self.client = OpenAI(api_key=os.getenv("JOB_API"))
         self.model = model
         self.embed_model = embed_model
