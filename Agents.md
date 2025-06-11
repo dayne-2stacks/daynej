@@ -1,7 +1,12 @@
 ## Summary
 
-AgentManager encapsulates a single OpenAI agent and provides methods like create_agent, run_agent, and get_last_message
-API endpoints create an AgentManager and call manager.create_agent(...) with instructions describing Dayne’s assistant
+AgentManager encapsulates a single OpenAI agent and provides methods like create_agent, run_agent, and get_last_message.
+API endpoints create an AgentManager and call manager.create_agent(...) with instructions describing Dayne’s assistant.
+
+The repository now includes a new ``agents_ext`` package that begins our transition
+to a multi‑agent architecture. It contains foundational components such as
+``BaseAgent`` along with ``Memory`` and ``Planner`` utilities, plus a simple
+``AgentRunner`` for executing agents asynchronously.
 
 
 ## Our codebase will transition to the Multi‑Agent Approach
@@ -35,7 +40,7 @@ If none of the specialized agents apply, this agent can request clarification or
 Our code abides strictly to OpenAI agents SDK. It will folloow the convention of handoffs and route agents so that each agent handles a singular and relatively easy task. Our code will also use an LLM as a judge in the sense that it will check its outputs and verify  if it needs to recall an agent or if it is an acceptable answer. Multiple agents will alsoo be running in parralel whereever possible. We will also be using MCP to govern tool use of our agents.
 
 Remember to update the Agents.md file whenever you make a large update to the code. Also bin/prepare.sh has been written to allow you to test and lint after making changes.
-
+Our team also creates a changelog in a change,md file to keep track of changes.
 
 ## Current Project structure (You will change this to adhere closely to OpenAI SDK's suggested implementation)
 
@@ -47,6 +52,14 @@ daynej/
 ├── managers.py                # Older “AssistantManager” (OpenAI Assistants API)
 ├── registry.py                # Simple registry for tool functions
 ├── helper.py                  # Utility helpers for tools/agents
+├── agents_ext/                # Experimental multi-agent framework
+│   ├── core/
+│   │   ├── base_agent.py
+│   │   ├── memory.py
+│   │   └── planner.py
+│   ├── runner/
+│   │   └── run.py
+│   └── skills/
 ├── api/                       # FastAPI application
 │   ├── __init__.py
 │   ├── api.py                 # Defines all API endpoints
@@ -83,6 +96,10 @@ register_tool stores tool objects by name; call invokes a tool’s handler.
 Helper Utilities (helper.py)
 Converts Python functions into tool schemas for OpenAI.
 Provides execute_tool_call for executing tools invoked via a thread.
+Multi-Agent Skeleton (agents_ext/)
+Contains ``BaseAgent``, ``Memory``, and ``Planner`` classes along with an
+``AgentRunner`` for orchestrating agent execution. These modules will evolve
+into a full multi-agent framework.
 FastAPI Application (api/api.py)
 Defines endpoints for registering a user, sending chat messages, streaming responses, and a WebSocket interface.
 Utilizes Redis for session management and stores user messages in SQLite via SQLAlchemy.
