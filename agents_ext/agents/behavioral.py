@@ -78,3 +78,20 @@ class BehavioralQuestionAgent(BaseAgent):
         content = response.choices[0].message.content.strip()
         self.add_message("assistant", content)
         return content
+
+
+if __name__ == "__main__":
+    import argparse
+    import asyncio
+
+    parser = argparse.ArgumentParser(
+        description="Answer a behavioral interview question"
+    )
+    parser.add_argument("question", nargs="?", help="Question to ask")
+    args = parser.parse_args()
+
+    question = args.question or input("Question: ")
+
+    agent = BehavioralQuestionAgent()
+    reply = asyncio.run(agent.run(question))
+    print(reply)
