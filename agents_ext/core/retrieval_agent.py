@@ -5,11 +5,9 @@ from math import sqrt
 from typing import Any, Dict, List
 
 try:
-    from sentence_transformers.cross_encoder import CrossEncoder # type: ignore
+    from sentence_transformers.cross_encoder import CrossEncoder  # type: ignore
 except Exception:  # pragma: no cover - optional dependency
-    print(
-        "sentence-transformers not installed; reranking will be unavailable."
-    )
+    print("sentence-transformers not installed; reranking will be unavailable.")
     CrossEncoder = None
 
 from openai import OpenAI

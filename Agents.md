@@ -18,7 +18,9 @@ Personal Info Agent
 Responds with details from api/kb/dayne.json such as contact info, location, and education.
 
 Experience Agent
-Specializes in questions about internships, projects, or accomplishments (see api/kb/experiences.json) additional information may also be in api/kb/dayne.json. 
+Retrieval-based agent that answers questions about Dayne's work history,
+projects, and extracurricular experience. It combines information from
+``api/kb/dayne.json`` and ``api/kb/experiences.json``.
 
 
 Behavioral Question Agent

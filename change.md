@@ -15,3 +15,5 @@
   second-stage reranker. BehavioralQuestionAgent now inherits from it.
 - ``RetrievalAgent`` now defaults to ColBERT-v2 and BGE-M3 checkpoints for
   reranking when ``sentence-transformers`` is available.
+- ExperienceAgent now uses RetrievalAgent to answer questions using data from
+  ``dayne.json`` and ``experiences.json``. Added unit test.
