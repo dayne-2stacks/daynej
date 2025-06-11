@@ -38,6 +38,9 @@ If none of the specialized agents apply, this agent can request clarification or
 Initial agent classes reside in `agents_ext/agents`. The `TriageAgent` now routes
 messages to dedicated agents for personal info, experience, hobbies, behavioral
 questions, resume generation, calendar scheduling, or a fallback response.
+Each of these agents is implemented in its own Python file inside
+`agents_ext/agents` (for example `personal_info.py` or `resume.py`) to make the
+codebase easier to extend.
 
 ## Coding Conventions
 Our code abides strictly to OpenAI agents SDK. It will folloow the convention of handoffs and route agents so that each agent handles a singular and relatively easy task. Our code will also use an LLM as a judge in the sense that it will check its outputs and verify  if it needs to recall an agent or if it is an acceptable answer. Multiple agents will alsoo be running in parralel whereever possible. We will also be using MCP to govern tool use of our agents.
