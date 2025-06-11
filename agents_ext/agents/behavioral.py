@@ -14,7 +14,7 @@ class BehavioralQuestionAgent(RetrievalAgent):
         self,
         model: str = "gpt-4o",
         embed_model: str = "text-embedding-3-small",
-        rerank_models: list[str] | None = None,
+        rerank_models: list[str] | None = ["BAAI/bge-reranker-v2-m3"],
     ) -> None:
         self.experiences = load_json("experiences.json")
         super().__init__(
@@ -31,6 +31,14 @@ class BehavioralQuestionAgent(RetrievalAgent):
 
     def _top_experiences(self, query: str, k: int = 3) -> list[str]:
         entries = self.retrieve(query, k)
+        print(f"Top {k} experiences for query: {query}")
+        if not entries:
+            return ["No relevant experiences found."]
+        else:
+            print(f"Found {len(entries)} relevant experiences.")
+            print("Top experiences:")
+        for e in entries:
+            print(f"- {self._get_entry_text(e)}")
         return [self._get_entry_text(e) for e in entries]
 
     def _build_messages(self, question: str) -> list[dict]:

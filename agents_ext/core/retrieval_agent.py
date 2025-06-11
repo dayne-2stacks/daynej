@@ -5,8 +5,11 @@ from math import sqrt
 from typing import Any, Dict, List
 
 try:
-    from sentence_transformers import CrossEncoder  # type: ignore
+    from sentence_transformers.cross_encoder import CrossEncoder # type: ignore
 except Exception:  # pragma: no cover - optional dependency
+    print(
+        "sentence-transformers not installed; reranking will be unavailable."
+    )
     CrossEncoder = None
 
 from openai import OpenAI
@@ -30,8 +33,7 @@ class RetrievalAgent(BaseAgent):
         self.model = model
         self.embed_model = embed_model
         self.rerank_models = rerank_models or [
-            "colbert-ir/colbertv2.0",
-            "BAAI/bge-m3",
+            "BAAI/bge-reranker-v2-m3",
         ]
         self._rerankers: Dict[str, Any] = {}
         self.data = data
@@ -58,6 +60,7 @@ class RetrievalAgent(BaseAgent):
             )
         if model not in self._rerankers:
             self._rerankers[model] = CrossEncoder(model)
+        print(f"Using reranker model: {model}")
         return self._rerankers[model]
 
     @staticmethod
@@ -82,8 +85,10 @@ class RetrievalAgent(BaseAgent):
         self, query: str, candidates: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         if not self.rerank_models or not candidates:
+            print("No reranking models configured or no candidates found.")
             return candidates
         if CrossEncoder is None:
+            print("Reranking not available; CrossEncoder not installed.")
             return candidates
 
         results = candidates
