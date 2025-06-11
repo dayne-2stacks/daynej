@@ -35,7 +35,9 @@ Responds to meeting suggestions by creating a gooogle calendar meeting with dayn
 
 Fallback Agent
 If none of the specialized agents apply, this agent can request clarification or suggest contacting Dayne directly.
-Initial agent classes reside in `agents_ext/agents` including a triage agent that routes to personal info, experience, or hobbies agents.
+Initial agent classes reside in `agents_ext/agents`. The `TriageAgent` now routes
+messages to dedicated agents for personal info, experience, hobbies, behavioral
+questions, resume generation, calendar scheduling, or a fallback response.
 
 ## Coding Conventions
 Our code abides strictly to OpenAI agents SDK. It will folloow the convention of handoffs and route agents so that each agent handles a singular and relatively easy task. Our code will also use an LLM as a judge in the sense that it will check its outputs and verify  if it needs to recall an agent or if it is an acceptable answer. Multiple agents will alsoo be running in parralel whereever possible. We will also be using MCP to govern tool use of our agents.

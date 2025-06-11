@@ -5,6 +5,9 @@ from .triage import (
     PersonalInfoAgent,
     ExperienceAgent,
     HobbiesAgent,
+    BehavioralQuestionAgent,
+    ResumeAgent,
+    CalendarAgent,
     FallbackAgent,
 )
 
@@ -13,5 +16,8 @@ __all__ = [
     "PersonalInfoAgent",
     "ExperienceAgent",
     "HobbiesAgent",
+    "BehavioralQuestionAgent",
+    "ResumeAgent",
+    "CalendarAgent",
     "FallbackAgent",
 ]

@@ -26,3 +26,24 @@ async def test_triage_fallback(anyio_backend):
     agent = TriageAgent()
     result = await agent.run("Tell me something unrelated.")
     assert "dayneguy@gmail.com" in result
+
+
+@pytest.mark.anyio
+async def test_triage_behavioral(anyio_backend):
+    agent = TriageAgent()
+    result = await agent.run("Give me a behavioral interview question")
+    assert "Dayne" in result
+
+
+@pytest.mark.anyio
+async def test_triage_resume(anyio_backend):
+    agent = TriageAgent()
+    result = await agent.run("Please generate a resume")
+    assert "resume" in result.lower()
+
+
+@pytest.mark.anyio
+async def test_triage_calendar(anyio_backend):
+    agent = TriageAgent()
+    result = await agent.run("Set up a meeting tomorrow")
+    assert "meeting" in result.lower()

@@ -57,6 +57,41 @@ class HobbiesAgent(BaseAgent):
         )
 
 
+class BehavioralQuestionAgent(BaseAgent):
+    """Handle typical interview or behavioral questions."""
+
+    def __init__(self) -> None:
+        super().__init__("behavioral")
+        self.qa_pairs = _load_json("behavioral_questions.json")
+
+    async def run(self, message: str) -> str:
+        text = message.lower()
+        for pair in self.qa_pairs:
+            if pair["question"].lower() in text:
+                return pair.get("answer") or "Dayne is still preparing an answer."
+        return "Dayne reflects on past experiences to answer that question."
+
+
+class ResumeAgent(BaseAgent):
+    """Return a short message representing a rendered resume."""
+
+    def __init__(self) -> None:
+        super().__init__("resume")
+
+    async def run(self, message: str) -> str:
+        return "Generated resume using renderCV."
+
+
+class CalendarAgent(BaseAgent):
+    """Simulate creating a calendar event."""
+
+    def __init__(self) -> None:
+        super().__init__("calendar")
+
+    async def run(self, message: str) -> str:
+        return "Scheduled a meeting with Dayne."
+
+
 class FallbackAgent(BaseAgent):
     """Default agent if no other agent matches the query."""
 
@@ -75,6 +110,9 @@ class TriageAgent(BaseAgent):
         self.personal = PersonalInfoAgent()
         self.experience = ExperienceAgent()
         self.hobbies = HobbiesAgent()
+        self.behavioral = BehavioralQuestionAgent()
+        self.resume = ResumeAgent()
+        self.calendar = CalendarAgent()
         self.fallback = FallbackAgent()
 
     async def run(self, message: str) -> str:
@@ -85,4 +123,10 @@ class TriageAgent(BaseAgent):
             return await self.experience.run(message)
         if "hobby" in text or "hobbies" in text:
             return await self.hobbies.run(message)
+        if "behavioral" in text or "interview" in text:
+            return await self.behavioral.run(message)
+        if "resume" in text or "cv" in text:
+            return await self.resume.run(message)
+        if "meeting" in text or "calendar" in text:
+            return await self.calendar.run(message)
         return await self.fallback.run(message)
