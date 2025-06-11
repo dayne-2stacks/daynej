@@ -34,6 +34,8 @@ class DummyRedis:
 class DummyManager:
     def __init__(self, model: str = "gpt-4o", registry=None) -> None:
         self.messages = []
+        self.agent = object()
+        self.input_list = []
 
     def add_message(self, role: str, content: str) -> None:
         self.messages.append((role, content))
@@ -112,3 +114,40 @@ def test_chat_message_uses_existing_session(test_client):
         rows = db.query(conn.Messages).all()
         # Only the /register call persists
         assert len(rows) == 1
+
+
+def test_chat_stream_sends_events(test_client, monkeypatch):
+    client, _ = test_client
+
+    class DummyEvent:
+        item = object()
+
+    class DummyStream:
+        async def stream_events(self):
+            yield DummyEvent()
+
+        def to_input_list(self):
+            return []
+
+    async def dummy_run_streamed(agent, input_list):
+        return DummyStream()
+
+    from agents import run as agents_run
+    from agents import ItemHelpers
+
+    monkeypatch.setattr(agents_run.Runner, "run_streamed", dummy_run_streamed)
+    monkeypatch.setattr(ItemHelpers, "text_message_outputs", lambda items: "chunk")
+
+    payload = {
+        "fname": "Jane",
+        "lname": "Doe",
+        "email": "jane@example.com",
+        "reason": "chat",
+        "message": "hi",
+    }
+
+    client.post("/register", json=payload)
+
+    with client.stream("POST", "/chat/stream", json={"message": "hello"}) as r:
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith("text/event-stream")

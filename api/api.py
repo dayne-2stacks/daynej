@@ -12,6 +12,7 @@ from .connection import Messages, init_db, get_db
 
 # from .tools import search_dayne_info, search_dayne_info_handler
 from fastapi.middleware.cors import CORSMiddleware
+from sse_starlette.sse import EventSourceResponse, ServerSentEvent
 
 
 # Add the parent directory to sys.path
@@ -215,6 +216,39 @@ async def chat(
     }
 
 
+@app.post("/chat/stream", response_class=EventSourceResponse)
+async def chat_stream(request: Request, message: UserMessage):
+    """Stream assistant responses via Server-Sent Events."""
+
+    # First determine the session and manager so the generator has access to
+    # the conversation state. We use a temporary response to capture the cookie
+    # headers which will be copied to the streaming response later.
+    temp_response = Response()
+    session_id = ensure_session(request, temp_response)
+    manager = get_or_create_manager(session_id)
+    manager.add_message("user", message.message)
+
+    from agents.run import Runner
+    from agents.stream_events import RunItemStreamEvent
+
+    async def event_generator():
+        streamed = await Runner.run_streamed(manager.agent, manager.input_list)
+        async for event in streamed.stream_events():
+            if isinstance(event, RunItemStreamEvent):
+                delta = ItemHelpers.text_message_outputs([event.item])
+                if delta:
+                    yield ServerSentEvent(data=delta)
+        manager.input_list = streamed.to_input_list()
+
+    response = EventSourceResponse(event_generator())
+
+    # Copy any session cookie headers to the streaming response
+    if "set-cookie" in temp_response.headers:
+        response.headers.append("set-cookie", temp_response.headers["set-cookie"])
+
+    return response
+
+
 @app.websocket("/ws/chat")
 async def websocket_chat(websocket: WebSocket):
     """Handle chat communication over a WebSocket."""
@@ -245,6 +279,8 @@ async def websocket_chat(websocket: WebSocket):
             manager.input_list = streamed.to_input_list()
     except WebSocketDisconnect:
         pass
+    finally:
+        await websocket.close(code=1000)
 
 
 # @app.get("/start-session")
