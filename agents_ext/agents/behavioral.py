@@ -83,9 +83,11 @@ class BehavioralQuestionAgent(BaseAgent):
 if __name__ == "__main__":
     import argparse
     import asyncio
+    from dotenv import load_dotenv
+    load_dotenv()
 
     parser = argparse.ArgumentParser(
-        description="Answer a behavioral interview question"
+        description="Answer a behavioral interview question. Respoond using the STAR method (Situation, Task, Action, Result)."
     )
     parser.add_argument("question", nargs="?", help="Question to ask")
     args = parser.parse_args()
