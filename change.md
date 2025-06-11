@@ -13,3 +13,5 @@
   interview questions based on experiences.json. Added unit tests.
 - Introduced ``RetrievalAgent`` base class providing embedding search with a
   second-stage reranker. BehavioralQuestionAgent now inherits from it.
+- ``RetrievalAgent`` now defaults to ColBERT-v2 and BGE-M3 checkpoints for
+  reranking when ``sentence-transformers`` is available.

@@ -14,7 +14,7 @@ class BehavioralQuestionAgent(RetrievalAgent):
         self,
         model: str = "gpt-4o",
         embed_model: str = "text-embedding-3-small",
-        rerank_model: str | None = "text-embedding-3-large",
+        rerank_models: list[str] | None = None,
     ) -> None:
         self.experiences = load_json("experiences.json")
         super().__init__(
@@ -22,7 +22,7 @@ class BehavioralQuestionAgent(RetrievalAgent):
             data=self.experiences,
             model=model,
             embed_model=embed_model,
-            rerank_model=rerank_model,
+            rerank_models=rerank_models,
         )
         self.client = OpenAI(api_key=os.getenv("JOB_API"))
 

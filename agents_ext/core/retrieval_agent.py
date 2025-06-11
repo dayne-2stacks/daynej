@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import os
 from math import sqrt
-from typing import Any, List, Dict
+from typing import Any, Dict, List
+
+try:
+    from sentence_transformers import CrossEncoder  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    CrossEncoder = None
 
 from openai import OpenAI
 
@@ -18,13 +23,17 @@ class RetrievalAgent(BaseAgent):
         data: List[Dict[str, Any]],
         model: str = "gpt-4o",
         embed_model: str = "text-embedding-3-small",
-        rerank_model: str | None = "text-embedding-3-large",
+        rerank_models: List[str] | None = None,
     ) -> None:
         super().__init__(name)
         self.client = OpenAI(api_key=os.getenv("JOB_API"))
         self.model = model
         self.embed_model = embed_model
-        self.rerank_model = rerank_model
+        self.rerank_models = rerank_models or [
+            "colbert-ir/colbertv2.0",
+            "BAAI/bge-m3",
+        ]
+        self._rerankers: Dict[str, Any] = {}
         self.data = data
         self._embeddings: List[List[float]] | None = None
 
@@ -41,6 +50,15 @@ class RetrievalAgent(BaseAgent):
         if self._embeddings is not None:
             return
         self._embeddings = [self._embed(self._get_entry_text(e)) for e in self.data]
+
+    def _get_reranker(self, model: str):
+        if CrossEncoder is None:
+            raise RuntimeError(
+                "sentence-transformers not installed; reranking unavailable"
+            )
+        if model not in self._rerankers:
+            self._rerankers[model] = CrossEncoder(model)
+        return self._rerankers[model]
 
     @staticmethod
     def _cosine(a: List[float], b: List[float]) -> float:
@@ -63,12 +81,19 @@ class RetrievalAgent(BaseAgent):
     def _rerank(
         self, query: str, candidates: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        if not self.rerank_model or not candidates:
+        if not self.rerank_models or not candidates:
             return candidates
-        query_emb = self._embed(query, self.rerank_model)
-        cand_embs = [
-            self._embed(self._get_entry_text(c), self.rerank_model) for c in candidates
-        ]
-        scores = [self._cosine(query_emb, emb) for emb in cand_embs]
-        ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
-        return [candidates[i] for i in ranked]
+        if CrossEncoder is None:
+            return candidates
+
+        results = candidates
+        for model in self.rerank_models:
+            try:
+                reranker = self._get_reranker(model)
+            except RuntimeError:
+                break
+            pairs = [[query, self._get_entry_text(c)] for c in results]
+            scores = reranker.predict(pairs)
+            ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+            results = [results[i] for i in ranked]
+        return results

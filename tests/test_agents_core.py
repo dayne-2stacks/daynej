@@ -47,7 +47,7 @@ async def test_base_agent_run(anyio_backend):
 class DummyRetrievalAgent(RetrievalAgent):
     def __init__(self) -> None:
         data = [{"text": "one"}, {"text": "two"}]
-        super().__init__("dummy", data=data, rerank_model=None)
+        super().__init__("dummy", data=data, rerank_models=None)
 
     def _get_entry_text(self, entry: dict) -> str:  # type: ignore[override]
         return entry["text"]
